@@ -10,7 +10,7 @@ contract TreeSale is Ownable {
 
 	Vault public trustedVault;
 
-	mapping(bytes32 => uint256) public trees;
+	mapping(bytes32 => bool) public trees;
 
 	constructor(
         address _wallet
@@ -25,8 +25,8 @@ contract TreeSale is Ownable {
 	function contribute(bytes32 _treeId) public payable
 	{
 		require(msg.value  == 1 ether);
-		require(trees[_treeId] == 1);
-		trees[_treeId] = 1; //is sold
+		require(trees[_treeId] == false);
+		trees[_treeId] = true; //is sold
 
 		trustedVault.depositValue.value(msg.value)(msg.sender, _treeId);
 
