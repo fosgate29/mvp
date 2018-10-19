@@ -28,17 +28,15 @@ contract Vault is Ownable {
     event Deposited(address indexed contributor, bytes32 treeId, uint256 amount, uint256 firstDepositTimestamp);
     event Refunded(address indexed contributor, bytes32 treeId, uint256 amount);
 
-    constructor(
-        address _wallet
-    ) 
-        public 
+    constructor(address _wallet) public 
     {
         require(_wallet != address(0), "Wallet address should not be 0.");
         trustedWallet = _wallet;
     }
 
     /// @dev Called by the sale contract to deposit ether for a contributor.
-    function depositValue(address _contributor, bytes32 _treeId) onlyOwner external payable {
+    function depositValue(address _contributor, bytes32 _treeId) onlyOwner external payable 
+    {
     	//first, transfer 10% to trusted wallet
     	require(msg.value == 1 ether, "Each tree must cost 1 Ether");
 
@@ -60,7 +58,8 @@ contract Vault is Ownable {
     }
 
     /// @dev Refunds ether to the contributors if in the contributors wants funds back.
-    function refund(bytes32 _treeId) external {
+    function refund(bytes32 _treeId) external 
+    {
 
     	Deposit storage deposit = deposits[_treeId];
 
@@ -75,7 +74,8 @@ contract Vault is Ownable {
     }
 
     /// @dev Sends the disbursement amount to the wallet after the disbursement period has passed. Can be called by anyone.
-    function sendFundsToWallet(bytes32 _treeId) external {
+    function sendFundsToWallet(bytes32 _treeId) external 
+    {
         
         Deposit storage deposit = deposits[_treeId];
 
