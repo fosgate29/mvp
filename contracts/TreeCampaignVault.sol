@@ -9,7 +9,7 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
  * @title Vault
  * @dev This contract is used for storing funds. 
  */
-contract Vault is Ownable {
+contract TreeCampaignVault is Ownable {
     using SafeMath for uint256;
 
     struct Deposit {
@@ -37,14 +37,18 @@ contract Vault is Ownable {
     /// @dev Called by the sale contract to deposit ether for a contributor.
     function depositValue(address _contributor, bytes32 _treeId) onlyOwner external payable 
     {
-    	//first, transfer 10% to trusted wallet
+
+    	//check if tree is available
+    	Deposit memory deposit = deposits[_treeId];
+    	require(deposit.treeOwner ==  address(0) || deposit.balance == 0);
+
     	require(msg.value == 1 ether, "Each tree must cost 1 Ether");
 
     	uint256 amount = msg.value;
     	uint256 fee_10percent = amount.div(10);
     	uint256 remain = amount.sub(fee_10percent);
 
-    	trustedWallet.transfer(fee_10percent);
+    	trustedWallet.transfer(fee_10percent); //first, transfer 10% to trusted wallet
 
 		deposits[_treeId] = Deposit({
 			treeOwner: _contributor, 
@@ -86,9 +90,9 @@ contract Vault is Ownable {
 		{
 			uint256 fee_10percent = deposit.initialDeposited.div(10);
     		uint256 remain = deposit.balance.sub(fee_10percent);
-			trustedWallet.transfer(fee_10percent);
 			deposit.balance = remain;
 			deposit.nextDisbursement = deposit.nextDisbursement + 365 days;
+			trustedWallet.transfer(fee_10percent);
 		}
 		else if(block.timestamp >= deposit.firstDepositTimestamp + 10 * (365 days)) {
 			uint256 allFunds = deposit.balance;
