@@ -13,12 +13,12 @@ contract TreeCampaignVault is Ownable {
     using SafeMath for uint256;
 
     struct Deposit {
-    	address treeOwner;
+        address treeOwner;
         uint256 initialDeposited;
         uint256 firstDepositTimestamp;
         uint256 nextDisbursement;
         uint256 balance;
-	}
+    }
 
     // Wallet from the project team
     address public trustedWallet;
@@ -37,26 +37,25 @@ contract TreeCampaignVault is Ownable {
     /// @dev Called by the sale contract to deposit ether for a contributor.
     function depositValue(address _contributor, bytes32 _treeId) onlyOwner external payable 
     {
+        //check if tree is available
+        Deposit memory deposit = deposits[_treeId];
+        require(deposit.treeOwner == address(0) || deposit.balance == 0);
 
-    	//check if tree is available
-    	Deposit memory deposit = deposits[_treeId];
-    	require(deposit.treeOwner ==  address(0) || deposit.balance == 0);
+        require(msg.value == 1 ether, "Each tree must cost 1 Ether");
 
-    	require(msg.value == 1 ether, "Each tree must cost 1 Ether");
+        uint256 amount = msg.value;
+        uint256 fee_10percent = amount.div(10);
+        uint256 remain = amount.sub(fee_10percent);
 
-    	uint256 amount = msg.value;
-    	uint256 fee_10percent = amount.div(10);
-    	uint256 remain = amount.sub(fee_10percent);
+        trustedWallet.transfer(fee_10percent); //first, transfer 10% to trusted wallet
 
-    	trustedWallet.transfer(fee_10percent); //first, transfer 10% to trusted wallet
-
-		deposits[_treeId] = Deposit({
-			treeOwner: _contributor, 
-			initialDeposited: msg.value, 
-			firstDepositTimestamp: block.timestamp, 
-			nextDisbursement: (block.timestamp + 365 days) , 
-			balance: remain
-			});
+        deposits[_treeId] = Deposit({
+            treeOwner: _contributor,
+            initialDeposited: msg.value,
+            firstDepositTimestamp: block.timestamp,
+            nextDisbursement: (block.timestamp + 365 days),
+            balance: remain
+            });
 
         emit Deposited(_contributor, _treeId, msg.value, block.timestamp);
     }
@@ -65,10 +64,10 @@ contract TreeCampaignVault is Ownable {
     function refund(bytes32 _treeId) external 
     {
 
-    	Deposit storage deposit = deposits[_treeId];
+        Deposit storage deposit = deposits[_treeId];
 
         require(deposit.balance > 0, "Refund not allowed if deposit balance is 0.");
-        require(deposit.treeOwner  == msg.sender, "Only onwer of the deposit can request a refund.");
+        require(deposit.treeOwner == msg.sender, "Only onwer of the deposit can request a refund.");
         uint256 refundAmount = deposit.balance;  //will refund what is lefted
         deposit.balance = 0;
         deposit.treeOwner.transfer(refundAmount);
@@ -83,22 +82,21 @@ contract TreeCampaignVault is Ownable {
         
         Deposit storage deposit = deposits[_treeId];
 
-        require(deposit.nextDisbursement <= now, "Next disbursement period timestamp has not yet passed, too early to withdraw.");
+        require(deposit.nextDisbursement <= block.timestamp, "Next disbursement period timestamp has not yet passed, too early to withdraw.");
         require(deposit.balance > 0, "Deposit balance is 0.");
 
-		if(block.timestamp > deposit.nextDisbursement && block.timestamp < deposit.firstDepositTimestamp + 10 * (365 days))
-		{
-			uint256 fee_10percent = deposit.initialDeposited.div(10);
-    		uint256 remain = deposit.balance.sub(fee_10percent);
-			deposit.balance = remain;
-			deposit.nextDisbursement = deposit.nextDisbursement + 365 days;
-			trustedWallet.transfer(fee_10percent);
-		}
-		else if(block.timestamp >= deposit.firstDepositTimestamp + 10 * (365 days)) {
-			uint256 allFunds = deposit.balance;
-			deposit.balance = 0;
-			trustedWallet.transfer(allFunds);
-		}
+        if(block.timestamp > deposit.nextDisbursement && block.timestamp < deposit.firstDepositTimestamp + 10 * (365 days))
+        {
+            uint256 fee_10percent = deposit.initialDeposited.div(10);
+            uint256 remain = deposit.balance.sub(fee_10percent);
+            deposit.balance = remain;
+            deposit.nextDisbursement = deposit.nextDisbursement + 365 days;
+            trustedWallet.transfer(fee_10percent);
+        }
+        else if(block.timestamp >= deposit.firstDepositTimestamp + 10 * (365 days)) {
+            uint256 allFunds = deposit.balance;
+            deposit.balance = 0;
+            trustedWallet.transfer(allFunds);
+        }
     }
-
 }

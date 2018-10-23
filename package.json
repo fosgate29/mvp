@@ -12,6 +12,7 @@
     "openzeppelin-solidity": "1.12.0"
   },
   "devDependencies": {
-    "truffle": "4.1.13"
+    "truffle": "4.1.13",
+    "solium": "^1.1.8"
   }
 }
