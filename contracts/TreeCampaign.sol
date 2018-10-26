@@ -20,7 +20,7 @@ contract TreeCampaign is Ownable {
     //treeId is the hash of what3words of the tree
     function contribute(bytes32 _treeId) public payable
     {
-        require(msg.value == 1 ether);
+        require(msg.value == 1 ether, "Contribution must be equal to 1 Ether");
 
         trustedVault.depositValue.value(msg.value)(msg.sender, _treeId);
 

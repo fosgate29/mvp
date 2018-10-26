@@ -39,7 +39,7 @@ contract TreeCampaignVault is Ownable {
     {
         //check if tree is available
         Deposit memory deposit = deposits[_treeId];
-        require(deposit.treeOwner == address(0) || deposit.balance == 0);
+        require(deposit.treeOwner == address(0) || deposit.balance == 0, "Tree must not have an owner or its balance must be zero.");
 
         require(msg.value == 1 ether, "Each tree must cost 1 Ether");
 
