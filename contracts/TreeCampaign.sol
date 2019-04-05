@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.7;
  
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
@@ -10,10 +10,9 @@ contract TreeCampaign is Ownable {
 
     TreeCampaignVault public trustedVault;
 
-    constructor(address _owner, address _wallet) public 
+    constructor(address payable _wallet) public 
     {
         require(_wallet != address(0), "Wallet address should not be 0.");
-        owner = _owner;
         trustedVault = new TreeCampaignVault(_wallet);
     }
 
@@ -27,7 +26,7 @@ contract TreeCampaign is Ownable {
     }
 
     //_treeLocation what3words location. Example water.car.home
-    function createTreeId(string _treeLocation) public pure returns(bytes32)
+    function createTreeId(string memory _treeLocation) public pure returns(bytes32)
     {
         return keccak256(abi.encodePacked(_treeLocation));
     }

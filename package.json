@@ -9,10 +9,10 @@
     "test": "truffle test"
   },
   "dependencies": {
-    "openzeppelin-solidity": "1.12.0"
+    "openzeppelin-solidity": "2.2.0"
   },
   "devDependencies": {
-    "truffle": "4.1.13",
-    "solium": "^1.1.8"
+    "truffle": "5.0.11",
+    "ethlint": "^1.2.3"
   }
 }

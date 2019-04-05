@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity 0.5.7;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
@@ -13,7 +13,7 @@ contract TreeCampaignVault is Ownable {
     using SafeMath for uint256;
 
     struct Deposit {
-        address treeOwner;
+        address payable treeOwner;
         uint256 initialDeposited;
         uint256 firstDepositTimestamp;
         uint256 nextDisbursement;
@@ -21,21 +21,21 @@ contract TreeCampaignVault is Ownable {
     }
 
     // Wallet from the project team
-    address public trustedWallet;
+    address payable public trustedWallet;
 
     mapping(bytes32 => Deposit) public deposits;
    
     event Deposited(address indexed contributor, bytes32 treeId, uint256 amount, uint256 firstDepositTimestamp);
     event Refunded(address indexed contributor, bytes32 treeId, uint256 amount);
 
-    constructor(address _wallet) public 
+    constructor(address payable _wallet) public 
     {
         require(_wallet != address(0), "Wallet address should not be 0.");
         trustedWallet = _wallet;
     }
 
     /// @dev Called by the sale contract to deposit ether for a contributor.
-    function depositValue(address _contributor, bytes32 _treeId) onlyOwner external payable 
+    function depositValue(address payable _contributor, bytes32 _treeId) onlyOwner external payable 
     {
         //check if tree is available
         Deposit memory deposit = deposits[_treeId];
