@@ -3,16 +3,16 @@
   "version": "0.0.1",
   "main": "index.js",
   "repository": "git@github.com:fosgate29/decentreelized.git",
-  "author": "fosgate29 <lh2407@gmail.com>",
+  "author": "fosgate29 <help@decentreelized.io>",
   "license": "MIT",
   "scripts": {
     "test": "truffle test"
   },
   "dependencies": {
-    "openzeppelin-solidity": "2.2.0"
+    "openzeppelin-solidity": "2.3.0"
   },
   "devDependencies": {
-    "truffle": "5.0.11",
+    "truffle": "5.0.19",
     "ethlint": "^1.2.3"
   }
 }

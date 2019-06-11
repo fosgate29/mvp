@@ -1,12 +1,10 @@
 pragma solidity 0.5.7;
  
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-
 import "./TreeCampaignVault.sol";
 
 
 /// @title Base contract
-contract TreeCampaign is Ownable {
+contract TreeCampaign {
 
     TreeCampaignVault public trustedVault;
 
@@ -16,7 +14,8 @@ contract TreeCampaign is Ownable {
         trustedVault = new TreeCampaignVault(_wallet);
     }
 
-    //treeId is the hash of what3words of the tree 
+    //treeId is the hash of what3words of the tree
+    //Example: water.ice.home
     function contribute(bytes32 _treeId) public payable
     {
         require(msg.value == 1 ether, "Contribution must be equal to 1 Ether");
