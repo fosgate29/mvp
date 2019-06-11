@@ -12,9 +12,8 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 contract TreeCampaignVault is Ownable {
     using SafeMath for uint256;
 
-    struct Deposit {
-        address payable treeOwner;
-        uint256 initialDeposited;
+    struct TreeDeposit {
+        address payable treeOwner;  //who is contributing to the farmer
         uint256 firstDepositTimestamp;
         uint256 nextDisbursement;
         uint256 balance;
@@ -25,13 +24,17 @@ contract TreeCampaignVault is Ownable {
 
     mapping(bytes32 => Deposit) public deposits;
    
-    event Deposited(address indexed contributor, bytes32 treeId, uint256 amount, uint256 firstDepositTimestamp);
-    event Refunded(address indexed contributor, bytes32 treeId, uint256 amount);
+    event LogVaultCreated(address indexed wallet, address owner);
+    event LogDeposited(address indexed contributor, bytes32 treeId, uint256 amount, uint256 firstDepositTimestamp);
+    event LogRefunded(address indexed contributor, bytes32 treeId, uint256 amount);
+    event LogFundsSentToWallet(bytes32 indexed treeId, address trustedWallet, uint256 amount);
+    event LogAllFundsSentToWallet(bytes32 indexed treeId, address trustedWallet, uint256 amount);
 
     constructor(address payable _wallet) public 
     {
         require(_wallet != address(0), "Wallet address should not be 0.");
         trustedWallet = _wallet;
+        emit LogVaultCreated(_wallet, this.owner);
     }
 
     /// @dev Called by the sale contract to deposit ether for a contributor.
@@ -51,13 +54,12 @@ contract TreeCampaignVault is Ownable {
 
         deposits[_treeId] = Deposit({
             treeOwner: _contributor,
-            initialDeposited: msg.value,
             firstDepositTimestamp: block.timestamp,
             nextDisbursement: (block.timestamp + 365 days),
             balance: remain
             });
 
-        emit Deposited(_contributor, _treeId, msg.value, block.timestamp);
+        emit LogDeposited(_contributor, _treeId, msg.value, block.timestamp);
     }
 
     /// @dev Refunds ether to the contributors if in the contributors wants funds back.
@@ -72,7 +74,7 @@ contract TreeCampaignVault is Ownable {
         deposit.balance = 0;
         deposit.treeOwner.transfer(refundAmount);
         
-        emit Refunded(deposit.treeOwner, _treeId, refundAmount);
+        emit LogRefunded(deposit.treeOwner, _treeId, refundAmount);
 
     }
 
@@ -87,16 +89,20 @@ contract TreeCampaignVault is Ownable {
 
         if(block.timestamp > deposit.nextDisbursement && block.timestamp < deposit.firstDepositTimestamp + 10 * (365 days))
         {
-            uint256 fee_10percent = deposit.initialDeposited.div(10);
+            uint256 initialDeposited = 1 ether;
+            uint256 fee_10percent = initialDeposited.div(10);
             uint256 remain = deposit.balance.sub(fee_10percent);
             deposit.balance = remain;
             deposit.nextDisbursement = deposit.nextDisbursement + 365 days;
             trustedWallet.transfer(fee_10percent);
+            emit LogFundsSentToWallet(_treeId, trustedWallet, fee_10percent);
         }
+        //if more than 10 years has passed, all funds can be collected
         else if(block.timestamp >= deposit.firstDepositTimestamp + 10 * (365 days)) {
             uint256 allFunds = deposit.balance;
             deposit.balance = 0;
             trustedWallet.transfer(allFunds);
+            emit LogAllFundsSentToWallet(_treeId, trustedWallet, allFunds);
         }
     }
 }
