@@ -38,11 +38,13 @@ contract TreeCampaignVault is Ownable {
     }
 
     /// @dev Called by the sale contract to deposit ether for a contributor.
-    function depositValue(address payable _contributor, bytes32 _treeId) onlyOwner external payable 
+    function depositValue(address payable _contributor, string _treeLocation) onlyOwner external payable 
     {
         //check if tree is available
+        bytes32 _treeId = keccak256(abi.encodePacked(_treeLocation));
         Deposit memory deposit = deposits[_treeId];
-        require(deposit.treeOwner == address(0) || deposit.balance == 0, "Tree must not have an owner or its balance must be zero.");
+        require(deposit.treeOwner == address(0), "Tree must not have an owner");
+        require(deposit.balance == 0, "Tree balance must be zero.");
 
         require(msg.value == 1 ether, "Each tree must cost 1 Ether");
 
@@ -59,7 +61,7 @@ contract TreeCampaignVault is Ownable {
             balance: remain
             });
 
-        emit LogDeposited(_contributor, _treeId, msg.value, block.timestamp);
+        emit LogDeposited(_contributor, _treeLocation, msg.value, block.timestamp);
     }
 
     /// @dev Refunds ether to the contributors if in the contributors wants funds back.
