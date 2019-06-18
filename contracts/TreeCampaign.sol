@@ -9,6 +9,7 @@ contract TreeCampaign {
     TreeCampaignVault public trustedVault;
 
     event LogVaultCreated(address campaignCreator, address vaultOwnerWallet, address trustedVaultCreated);
+    event LogContributionSent(address contributor, uint256 value, string treeLocation);
 
     constructor(address payable _wallet) public 
     {
@@ -24,5 +25,8 @@ contract TreeCampaign {
         require(msg.value == 1 ether, "Contribution must be equal to 1 Ether");
 
         trustedVault.depositValue.value(msg.value)(msg.sender, _treeLocation);
+
+        emit LogContributionSent(msg.sender, msg.value, _treeLocation);
+
     }
 }
