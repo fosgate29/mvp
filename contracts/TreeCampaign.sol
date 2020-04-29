@@ -1,4 +1,4 @@
-pragma solidity 0.5.7;
+pragma solidity 0.6.6;
  
 import "./TreeCampaignVault.sol";
 
@@ -8,23 +8,23 @@ contract TreeCampaign {
 
     TreeCampaignVault public trustedVault;
 
-    event LogVaultCreated(address campaignCreator, address vaultOwnerWallet, address trustedVaultCreated);
+    event LogVaultCreated(address campaignCreator, address vaultOwnerWallet);
     event LogContributionSent(address contributor, uint256 value, string treeLocation);
 
     constructor(address payable _wallet) public 
     {
         require(_wallet != address(0), "Wallet address should not be 0.");
         trustedVault = new TreeCampaignVault(_wallet);
-        emit LogVaultCreated(msg.sender, _wallet, trustedVaultCreated);
+        emit LogVaultCreated(msg.sender, _wallet);
     }
 
     //treeId is the hash of what3words of the tree
     //Example: water.ice.home
-    function contribute(string _treeLocation) public payable
+    function contribute(string memory _treeLocation) public payable
     {
         require(msg.value == 1 ether, "Contribution must be equal to 1 Ether");
 
-        trustedVault.depositValue.value(msg.value)(msg.sender, _treeLocation);
+        trustedVault.depositValue{value: msg.value}(msg.sender, _treeLocation);
 
         emit LogContributionSent(msg.sender, msg.value, _treeLocation);
 
